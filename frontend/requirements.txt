@@ -1,0 +1,6 @@
+react-router-dom
+react-hook-form
+zod
+@hookform/resolvers
+amazon-cognito-identity-js
+axios
