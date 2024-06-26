@@ -29,8 +29,6 @@ def update_profile():
     client_secret = os.getenv("API_CLIENT_SECRET")
     id = request.json.get("id")
     name = request.json.get("name")
-    print(id)
-    print(name)
 
     url = os.getenv("AUTH0_TOKEN_URL")
     headers = {'content-type': "application/x-www-form-urlencoded"}
@@ -89,7 +87,7 @@ def get_listing_id(listing_id):
 
 @app.route("/create_listing", methods=["POST"])
 @require_auth("create:listing")
-def create_listing(): 
+def create_listing():
     apartment = request.json.get("apartment")
     rent = int(request.json.get("rent"))
     lay_out = request.json.get("layOut")
@@ -105,19 +103,19 @@ def create_listing():
     end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
     post_date = datetime.strptime(post_date, '%Y-%m-%d %H:%M:%S')
     
-    images = request.json.get("images")  # Assuming 'files' is the name of the file input field
-    sub = request.json.get("userSub")
+    images = request.json.get("images") 
 
+    sub = request.json.get("userSub")
     user = User.query.filter_by(sub=sub).first()
     if not user:
         return jsonify({"message": "User not found"}), 404
 
-    #if user.listing:
-        #return jsonify({"message": "Can only have 1 listing. Delete your current listing to make another listing."}), 400
-
     new_listing = Listing(apartment=apartment, rent=rent, lay_out=lay_out, description=description,
                          gender=gender, semester=semester, start_date=start_date, end_date=end_date,
                          post_date=post_date, images=images, user=user)
+
+    user.listings.append(new_listing)
+
     try:
         db.session.add(new_listing)
         db.session.commit()

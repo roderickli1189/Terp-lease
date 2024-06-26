@@ -15,8 +15,10 @@ class Listing(db.Model):
     end_date = db.Column(db.Date, nullable=False)
     post_date = db.Column(db.DateTime, nullable=False)
     images = db.Column(ARRAY(db.String), nullable=True)
-    #change uselist to false inorder to make it one to one relationship
-    user = db.relationship('User', backref='listing', uselist=False)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    user = db.relationship('User', back_populates='listings')
 
     def to_json(self):
         return {
@@ -44,7 +46,7 @@ class User(db.Model):
     sub = db.Column(db.String(), unique=False, nullable=False)
     email = db.Column(db.String(), unique=True, nullable=False)
     picture = db.Column(db.String(), unique=True, nullable=False)
-    listing_id = db.Column(db.Integer, db.ForeignKey('listing.id'))
+    listings = db.relationship('Listing', back_populates='user')
 
     def to_json(self):
         return {
@@ -53,5 +55,5 @@ class User(db.Model):
             "sub": self.sub,
             "email": self.email,
             "picture": self.picture,
-            "listing_id": self.listing_id
+            "listings": [listing.to_json() for listing in self.listings]
         }

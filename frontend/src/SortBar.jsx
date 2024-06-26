@@ -22,7 +22,8 @@ const SortBar = ({ setSortOption }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-1/6 border-2 border-red-500 rounded-lg m-6">
+    //h-screen fucks it up tho
+    <div className="flex flex-col items-center justify-start w-1/6 border-r-2 border-red-500 m-6">
       <form onSubmit={handleSubmit(onSubmit)} className="h-full w-full">
         <h1 className="underline">Filter Options</h1>
         <h2>Date:</h2>
