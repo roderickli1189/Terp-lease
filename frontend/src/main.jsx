@@ -10,6 +10,7 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import { AuthenticationGuard } from "./AuthGuard.jsx";
 import Profile from "./pages/Profile.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import UpdateListing from "./pages/UpdateListing.jsx";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
     element: <Profile />,
   },
   {
+    path: "/update_listing",
+    element: <AuthenticationGuard component={UpdateListing} />,
+  },
+  {
     path: "/not-found", // Route for the NotFound component
     element: <NotFound />,
   },
@@ -49,7 +54,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
       authorizationParams={{
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        scope: "create:listing read:messages update:user openid profile email",
+        scope:
+          "create:listing read:messages update:user update:listing openid profile email",
         redirect_uri: window.location.origin,
       }}
     >

@@ -59,14 +59,35 @@ const schema = z
     }
   );
 
-const ListingForm = () => {
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+  const day = String(date.getDate()).padStart(2, "0");
+
+  // Format the date as "year-mon-day"
+  return `${year}-${month}-${day}`;
+}
+const UpdateListingForm = ({ listing }) => {
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors },
     reset,
-  } = useForm({ resolver: zodResolver(schema) });
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      apartment: listing.apartment,
+      rent: listing.rent.toString(),
+      layOut: listing.layOut,
+      gender: listing.gender,
+      semester: listing.semester,
+      start_date: formatDate(listing.startDate),
+      end_date: formatDate(listing.endDate),
+      description: listing.description,
+    },
+  });
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [selectedFiles, setSelectedFiles] = useState([]);
 
@@ -88,38 +109,24 @@ const ListingForm = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log(data);
-    //later down the line look to implement it such that regardless of timezone everything is standard
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    const hour = String(today.getHours()).padStart(2, "0");
-    const minute = String(today.getMinutes()).padStart(2, "0");
-    const second = String(today.getSeconds()).padStart(2, "0");
-
-    const formattedDate = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-
     const fileBase64 = await convertFilesToBase64(data.files);
-
+    const payload = {
+      ...data,
+      images: fileBase64,
+      id: listing.id,
+    };
+    console.log(payload);
     try {
       const accessToken = await getAccessTokenSilently({
         authorizationParams: {
           audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-          scope: "create:listing",
+          scope: "update:listing",
         },
       });
 
-      const payload = {
-        ...data,
-        postDate: formattedDate,
-        images: fileBase64,
-        userSub: user.sub,
-      };
-
-      const url = "http://127.0.0.1:5000/create_listing";
+      const url = "http://127.0.0.1:5000/update_listing";
       const options = {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -155,7 +162,7 @@ const ListingForm = () => {
           <button>close</button>
         </form>
       </dialog>
-      <div className="container mx-auto max-w-xl">
+      <div className="container mx-auto max-w-4xl">
         <form
           className="flex flex-col border-2 border-black rounded-lg p-4"
           onSubmit={handleSubmit(onSubmit)}
@@ -358,4 +365,4 @@ const ListingForm = () => {
   );
 };
 
-export default ListingForm;
+export default UpdateListingForm;

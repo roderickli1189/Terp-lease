@@ -5,32 +5,36 @@ import ProfileForm from "../forms/ProfileForm";
 import React, { useEffect, useState } from "react";
 
 const Profile = () => {
-    const { user, isAuthenticated, isLoading } = useAuth0();
+  const { user, isAuthenticated, isLoading } = useAuth0();
 
-    if (isLoading) {
-        return (
-            <Loading loading={isLoading} />
-        );
-    }
+  if (isLoading) {
+    return <Loading loading={isLoading} />;
+  }
 
-    return (
-        isAuthenticated && (
-            <div>
-                <Header />
-                <div>
-                    <img src={user.picture} alt={user.name} />
-                    <h2>{user.name}</h2>
-                    <p>{user.email}</p>
-                    <p>{user.nickname}</p>
-                    <h3>User Metadata</h3>
+  return (
+    isAuthenticated && (
+      <div>
+        <Header />
 
-                    <pre>{JSON.stringify(user, null, 2)}</pre>
+        <div className="flex flex-col justify-center items-center">
+          <h1 className="font-bold underline text-2xl pb-2">Profile</h1>
 
-                </div>
-                <ProfileForm />
+          <div className="card bg-base-100 w-96 shadow-xl m-6">
+            <figure>
+              <img src={user.picture} alt="profile pic" />
+            </figure>
+            <div className="card-body">
+              <h2>Name: {user.name}</h2>
+              <p>Email: {user.email}</p>
+              <p>Nickname: {user.nickname}</p>
+              <p>{user.sub}</p>
             </div>
-        )
-    );
+          </div>
+          <ProfileForm />
+        </div>
+      </div>
+    )
+  );
 };
 
 export default Profile;

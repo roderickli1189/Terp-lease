@@ -57,3 +57,8 @@ class User(db.Model):
             "picture": self.picture,
             "listings": [listing.to_json() for listing in self.listings]
         }
+    
+    def get_listing(self):
+        return {
+            "listings": [listing.to_json() for listing in self.listings]
+        }

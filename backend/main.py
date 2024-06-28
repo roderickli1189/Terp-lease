@@ -22,6 +22,43 @@ validator = Auth0JWTBearerTokenValidator(
 )
 require_auth.register_token_validator(validator)
 
+@app.route("/update_listing", methods=["PATCH"])
+@require_auth("update:listing")
+def update_listing():
+    try:
+        data = request.get_json()
+        listing_id = data.get("id")
+        listing = Listing.query.get(listing_id)
+
+        if not listing:
+            return jsonify({"message": "Listing not found"}), 404
+
+        listing.apartment = data.get("apartment") if data.get("apartment") else listing.apartment
+        listing.rent = data.get("rent") if data.get("rent") else listing.rent
+        listing.lay_out = data.get("layOut") if data.get("layOut") else listing.lay_out
+        listing.description = data.get("description") if data.get("description") else listing.description
+        listing.gender = data.get("gender") if data.get("gender") else listing.gender
+        listing.semester = data.get("semester") if data.get("semester") else listing.semester
+        listing.images = data.get("images") if data.get("images") else listing.images
+
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+
+        if start_date and end_date:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            listing.start_date = start_date
+            listing.end_date = end_date
+        
+        # Save the changes to the database
+        db.session.commit()
+
+        # Return the updated listing
+        return jsonify({"message": "works!"}), 200
+
+    except Exception as e:
+        return jsonify({"message": "An error occurred", "error": str(e)}), 500
+
 @app.route("/update_profile", methods=["PATCH"])
 @require_auth("update:user")
 def update_profile():
@@ -85,6 +122,13 @@ def get_listing_id(listing_id):
     
     return jsonify(listing.to_json())
 
+@app.route("/user_listings/<user_id>", methods=["GET"])
+def get_user_listings(user_id):
+    user = User.query.filter_by(sub=user_id).first()
+    if not user:
+        return jsonify({"error": "Listing not found"}), 404
+    return jsonify(user.get_listing())
+
 @app.route("/create_listing", methods=["POST"])
 @require_auth("create:listing")
 def create_listing():
@@ -99,8 +143,8 @@ def create_listing():
     end_date = request.json.get("end_date")
     post_date = request.json.get("postDate")
 
-    start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+    start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    end_date = datetime.strptime(end_date, '%Y-%m-%d')
     post_date = datetime.strptime(post_date, '%Y-%m-%d %H:%M:%S')
     
     images = request.json.get("images") 
@@ -114,11 +158,10 @@ def create_listing():
                          gender=gender, semester=semester, start_date=start_date, end_date=end_date,
                          post_date=post_date, images=images, user=user)
 
-    user.listings.append(new_listing)
-
     try:
         db.session.add(new_listing)
         db.session.commit()
+        user.listings.append(new_listing)
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
