@@ -115,7 +115,6 @@ const UpdateListingForm = ({ listing }) => {
       images: fileBase64,
       id: listing.id,
     };
-    console.log(payload);
     try {
       const accessToken = await getAccessTokenSilently({
         authorizationParams: {
