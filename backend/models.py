@@ -18,8 +18,6 @@ class Listing(db.Model):
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    user = db.relationship('User', back_populates='listings')
-
     def to_json(self):
         return {
             "id": self.id,
@@ -46,7 +44,7 @@ class User(db.Model):
     sub = db.Column(db.String(), unique=False, nullable=False)
     email = db.Column(db.String(), unique=True, nullable=False)
     picture = db.Column(db.String(), unique=True, nullable=False)
-    listings = db.relationship('Listing', back_populates='user')
+    listings = db.relationship('Listing', backref="user")
 
     def to_json(self):
         return {

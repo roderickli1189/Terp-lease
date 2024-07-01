@@ -22,13 +22,25 @@ validator = Auth0JWTBearerTokenValidator(
 )
 require_auth.register_token_validator(validator)
 
+@app.route("/delete_listing/<listing_id>", methods=["DELETE"])
+@require_auth("delete:listing")
+def delete_listing(listing_id):
+    print(listing_id)
+    listing = db.session.get(Listing, listing_id)
+    if not listing:
+        return jsonify({"message": "Listing not found"}), 404
+    else:
+        db.session.delete(listing)  # Mark the listing for deletion
+        db.session.commit()
+        return jsonify({"message": "Listing deleted"}), 200
+    
 @app.route("/update_listing", methods=["PATCH"])
 @require_auth("update:listing")
 def update_listing():
     try:
         data = request.get_json()
         listing_id = data.get("id")
-        listing = Listing.query.get(listing_id)
+        listing = db.session.get(Listing, listing_id)
 
         if not listing:
             return jsonify({"message": "Listing not found"}), 404
@@ -116,7 +128,7 @@ def get_listings():
 
 @app.route("/listings/<listing_id>", methods=["GET"])
 def get_listing_id(listing_id):
-    listing = Listing.query.get(listing_id)
+    listing = db.session.get(Listing, listing_id)
     if not listing:
         return jsonify({"error": "Listing not found"}), 404
     
@@ -153,6 +165,8 @@ def create_listing():
     user = User.query.filter_by(sub=sub).first()
     if not user:
         return jsonify({"message": "User not found"}), 404
+    if len(user.listings) >= 2:
+        return jsonify({"message": "cannot have more than two listings at once"}), 404
 
     new_listing = Listing(apartment=apartment, rent=rent, lay_out=lay_out, description=description,
                          gender=gender, semester=semester, start_date=start_date, end_date=end_date,
@@ -161,7 +175,6 @@ def create_listing():
     try:
         db.session.add(new_listing)
         db.session.commit()
-        user.listings.append(new_listing)
     except Exception as e:
         return jsonify({"message": str(e)}), 400
 
