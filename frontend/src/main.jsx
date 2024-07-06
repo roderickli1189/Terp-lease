@@ -55,7 +55,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       authorizationParams={{
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
         scope:
-          "create:listing read:messages update:user update:listing delete:listing openid profile email",
+          "create:listing read:messages update:user update:listing delete:listing read:user_phone openid profile email",
         redirect_uri: window.location.origin,
       }}
     >

@@ -23,7 +23,6 @@ function ListingIdPage() {
     const data = await getListing.json();
 
     if (getListing.status !== 404) {
-      console.log(data);
       setListings(data);
       setLoading(false);
     } else {
@@ -109,7 +108,15 @@ function ListingIdPage() {
               <div className="card-body">
                 <h2 className="card-title">Original Poster</h2>
                 <p>Name: {listing.user.name}</p>
+                <p>
+                  Nickname:{" "}
+                  {listing.user.nickname ? listing.user.nickname : "None"}
+                </p>
                 <p>Email: {listing.user.email}</p>
+                <p>
+                  Phone number:{" "}
+                  {listing.user.phoneNumber ? listing.user.phoneNumber : "None"}
+                </p>
                 <div className="card-actions justify-end">
                   <button className="btn btn-primary">Message Now</button>
                 </div>

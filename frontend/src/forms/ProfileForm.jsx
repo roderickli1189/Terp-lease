@@ -3,10 +3,23 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth0 } from "@auth0/auth0-react";
 
+const phoneNumber = z
+  .string()
+  .optional()
+  .refine(
+    (val) => {
+      const regex = /^\d{3}-\d{3}-\d{4}$/;
+      return !val || regex.test(val);
+    },
+    {
+      message: "Invalid phone number format",
+    }
+  );
+
 const schema = z.object({
-  name: z
-    .string()
-    .min(1, { message: "name must contain at least 1 character(s)" }),
+  name: z.string().optional(),
+  nickname: z.string().optional(),
+  phoneNumber: phoneNumber,
 });
 
 const ProfileForm = () => {
@@ -63,21 +76,52 @@ const ProfileForm = () => {
         className="flex flex-col items-center border-2 border-black rounded-lg p-4"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="mb-4 p-3 rounded-lg">
-          <label htmlFor="name" className="block mb-1">
-            name:
-          </label>
+        <h1 className="font-bold underline text-lg mb-6">
+          Profile Update Form
+        </h1>
+        <label htmlFor="name" className="block mb-1">
+          Name
+        </label>
+        <input
+          {...register("name")}
+          type="text"
+          id="name"
+          placeholder="new name"
+          className="input input-bordered w-full max-w-xs mb-2"
+        />
+        {errors.name && (
+          <div className="text-red-500">{errors.name.message}</div>
+        )}
+        <label htmlFor="nickname" className="block mb-1">
+          Nickname
+        </label>
+        <input
+          {...register("nickname")}
+          type="text"
+          id="nickname"
+          placeholder="new nickname"
+          className="input input-bordered w-full max-w-xs mb-2"
+        />
+        {errors.nickname && (
+          <div className="text-red-500">{errors.nickname.message}</div>
+        )}
+        <label className="form-control w-full max-w-xs mb-1">
+          <div className="label">
+            <span className="label-text">Phone Number</span>
+            <span className="label-text-alt">(format - xxx-xxx-xxxx)</span>
+          </div>
           <input
-            {...register("name")}
-            type="text"
-            id="name"
-            placeholder="new name"
-            className="input input-bordered w-full max-w-xs"
+            {...register("phoneNumber")}
+            type="tel"
+            id="phoneNumber"
+            placeholder="012-345-6789"
+            className="input input-bordered w-full max-w-xs mb-2"
           />
-          {errors.name && (
-            <div className="text-red-500">{errors.name.message}</div>
-          )}
-        </div>
+        </label>
+        {errors.phoneNumber && (
+          <div className="text-red-500">{errors.phoneNumber.message}</div>
+        )}
+
         <button type="submit" className="btn">
           Submit
         </button>

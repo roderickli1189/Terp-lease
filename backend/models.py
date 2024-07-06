@@ -34,16 +34,20 @@ class Listing(db.Model):
             "user": {
                 "name": self.user.name,  # Assuming username is equivalent to name
                 "email": self.user.email,
-                "picture": self.user.picture
+                "picture": self.user.picture,
+                "nickname": self.user.nickname,
+                "phoneNumber": self.user.phone_number,
             } if self.user else None,
         }
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), unique=False, nullable=False)
+    nickname = db.Column(db.String(), unique=False, nullable=True)
     sub = db.Column(db.String(), unique=False, nullable=False)
     email = db.Column(db.String(), unique=True, nullable=False)
     picture = db.Column(db.String(), unique=True, nullable=False)
+    phone_number = db.Column(db.String(), unique=True, nullable=True)
     listings = db.relationship('Listing', backref="user")
 
     def to_json(self):
@@ -53,7 +57,10 @@ class User(db.Model):
             "sub": self.sub,
             "email": self.email,
             "picture": self.picture,
-            "listings": [listing.to_json() for listing in self.listings]
+            "listings": [listing.to_json() for listing in self.listings],
+            "phoneNumber": self.phone_number,
+            "nickname": self.nickname,
+
         }
     
     def get_listing(self):

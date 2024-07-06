@@ -45,7 +45,6 @@ const UpdateListing = () => {
   };
 
   const handleDelete = async (id) => {
-    console.log("floppers");
     try {
       const accessToken = await getAccessTokenSilently({
         authorizationParams: {

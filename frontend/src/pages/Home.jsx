@@ -43,6 +43,8 @@ function Home() {
       sub: user.sub,
       email: user.email,
       picture: user.picture,
+      nickname: user.nickname,
+      phoneNumber: user.phone_number,
     };
     const url = "http://127.0.0.1:5000/create_account";
     const options = {

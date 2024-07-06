@@ -22,6 +22,14 @@ validator = Auth0JWTBearerTokenValidator(
 )
 require_auth.register_token_validator(validator)
 
+@app.route("/get_phone/<user_id>", methods=["GET"])
+@require_auth("read:user_phone")
+def get_phone(user_id):
+    user = User.query.filter_by(sub=user_id).first()
+    if not user:
+        return jsonify({"message": "user doesn't exist"}), 404
+    return jsonify({"phoneNumber":user.phone_number}), 200
+
 @app.route("/delete_listing/<listing_id>", methods=["DELETE"])
 @require_auth("delete:listing")
 def delete_listing(listing_id):
@@ -75,9 +83,16 @@ def update_listing():
 @require_auth("update:user")
 def update_profile():
 
+    # getting auth0 management token
     client_secret = os.getenv("API_CLIENT_SECRET")
-    id = request.json.get("id")
+    sub = request.json.get("id")
     name = request.json.get("name")
+    nickname = request.json.get("nickname")
+    phoneNumber = request.json.get("phoneNumber")
+    cpy = phoneNumber
+    parts = phoneNumber.split("-")
+    phoneNumber = "+1" + ''.join(parts)
+    user = User.query.filter_by(sub=sub).first()
 
     url = os.getenv("AUTH0_TOKEN_URL")
     headers = {'content-type': "application/x-www-form-urlencoded"}
@@ -94,23 +109,41 @@ def update_profile():
     
     if response.status_code == 200:
         access_token = token_data.get("access_token")
-        
-        url = os.getenv('AUTH0_UPDATE_USER_URL') + id
 
-        payload = json.dumps({
-            "nickname" : name
-        })
+        url = os.getenv('AUTH0_UPDATE_USER_URL') + sub
+
+        payload = {}
+
+        if name != "":
+            payload["name"] = name
+        if nickname != "":
+            payload["nickname"] = nickname
+        if phoneNumber != "":
+            payload["user_metadata"] = { "phoneNumber": phoneNumber}
+
+        payload_json = json.dumps(payload)
+
         headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': f'Bearer {access_token}'
         }
 
-        response = requests.request("PATCH", url, headers=headers, data=payload)
+        response = requests.request("PATCH", url, headers=headers, data=payload_json)
         response_data = response.json()
 
          # Check if the update was successful
         if response.status_code == 200:
+            
+            # updating the user on our side
+            if name is not None:
+                user.name = name
+            if nickname is not None:
+                user.nickname = nickname
+            if phoneNumber is not None:
+                user.phone_number = cpy
+            db.session.commit()
+
             message = "User profile updated successfully"
             return jsonify(message=message)
         else:
@@ -186,13 +219,15 @@ def create_account():
     sub = request.json.get("sub")
     email = request.json.get("email")
     picture = request.json.get("picture")
+    nickname = request.json.get("nickname")
+    phone_number = request.json.get("phoneNumber")
 
     try:
         unique_user = User.query.filter_by(sub=sub).first()
         if unique_user:
             return jsonify({"message": "user already exists"}), 409
         
-        new_user = User(name=name, sub=sub, email=email, picture=picture)
+        new_user = User(name=name, sub=sub, email=email, picture=picture, nickname=nickname, phone_number=phone_number)
         db.session.add(new_user)
         db.session.commit()
         
