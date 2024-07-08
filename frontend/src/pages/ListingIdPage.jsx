@@ -107,7 +107,7 @@ function ListingIdPage() {
               </figure>
               <div className="card-body">
                 <h2 className="card-title">Original Poster</h2>
-                <p>Name: {listing.user.name}</p>
+                <p>Name: {listing.user.name ? listing.user.name : "None"}</p>
                 <p>
                   Nickname:{" "}
                   {listing.user.nickname ? listing.user.nickname : "None"}

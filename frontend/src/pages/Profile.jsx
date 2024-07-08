@@ -8,6 +8,7 @@ const Profile = () => {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
     useAuth0();
   const [phone, setPhone] = useState();
+  const [phoneLoading, setPhoneLoading] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -17,6 +18,7 @@ const Profile = () => {
 
   const fetchPhone = async () => {
     try {
+      setPhoneLoading(true);
       const accessToken = await getAccessTokenSilently({
         authorizationParams: {
           audience: import.meta.env.VITE_AUTH0_AUDIENCE,
@@ -43,18 +45,30 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error fetching phone number:", error);
+    } finally {
+      setPhoneLoading(false);
     }
   };
 
-  if (isLoading) {
-    return <Loading loading={isLoading} />;
+  if (isLoading || phoneLoading) {
+    return <Loading loading={isLoading || phoneLoading} />;
   }
 
   return (
     isAuthenticated && (
       <div>
         <Header />
-
+        <dialog id="my_modal_2" className="modal">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg text-green-500">
+              Form submitted successfully!
+            </h3>
+            <p className="py-4">Press ESC key or click outside to close</p>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
         <div className="flex flex-col justify-center items-center">
           <h1 className="font-bold underline text-2xl pb-2">Profile</h1>
 

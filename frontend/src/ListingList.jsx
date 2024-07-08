@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const ListingList = ({ listings }) => {
   return (
-    <div className="w-4/5 grid grid-cols-3 ">
+    <div className="grid grid-cols-3">
       {listings.map((listing) => (
         <div key={listing.id} className="card border-2 border-red-500 m-6 p-3">
           <div className="card-body items-center">

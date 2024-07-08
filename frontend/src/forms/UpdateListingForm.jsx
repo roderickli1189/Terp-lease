@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,6 +91,25 @@ const UpdateListingForm = ({ listing }) => {
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [selectedFiles, setSelectedFiles] = useState([]);
 
+  useEffect(() => {
+    const modal = document.getElementById("my_modal_3");
+
+    const handleClose = () => {
+      console.log("Modal closed");
+      window.location.reload();
+    };
+
+    if (modal) {
+      modal.addEventListener("close", handleClose);
+    }
+
+    return () => {
+      if (modal) {
+        modal.removeEventListener("close", handleClose);
+      }
+    };
+  }, []);
+
   const handleFileChange = (event) => {
     setSelectedFiles([...event.target.files]);
   };
@@ -139,7 +158,7 @@ const UpdateListingForm = ({ listing }) => {
           message: data.message,
         });
       } else {
-        document.getElementById("my_modal_2").showModal();
+        document.getElementById("my_modal_3").showModal();
         reset();
         console.log("works");
       }
@@ -150,7 +169,7 @@ const UpdateListingForm = ({ listing }) => {
 
   return (
     <>
-      <dialog id="my_modal_2" className="modal">
+      <dialog id="my_modal_3" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg text-green-500">
             Form submitted successfully!

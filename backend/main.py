@@ -136,11 +136,11 @@ def update_profile():
         if response.status_code == 200:
             
             # updating the user on our side
-            if name is not None:
+            if name != "":
                 user.name = name
-            if nickname is not None:
+            if nickname != "":
                 user.nickname = nickname
-            if phoneNumber is not None:
+            if cpy != "":
                 user.phone_number = cpy
             db.session.commit()
 

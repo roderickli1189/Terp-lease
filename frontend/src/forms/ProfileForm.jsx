@@ -16,11 +16,21 @@ const phoneNumber = z
     }
   );
 
-const schema = z.object({
-  name: z.string().optional(),
-  nickname: z.string().optional(),
-  phoneNumber: phoneNumber,
-});
+const schema = z
+  .object({
+    name: z.string().optional(),
+    nickname: z.string().optional(),
+    phoneNumber: phoneNumber,
+  })
+  .refine(
+    (data) => {
+      return !!data.name || !!data.nickname || !!data.phoneNumber;
+    },
+    {
+      message: "At least one field must be filled out",
+      path: ["name"],
+    }
+  );
 
 const ProfileForm = () => {
   const {
@@ -28,11 +38,13 @@ const ProfileForm = () => {
     handleSubmit,
     setError,
     formState: { errors },
+    reset,
   } = useForm({ resolver: zodResolver(schema) });
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
 
   const onSubmit = async (data) => {
     try {
+      console.log(data);
       const accessToken = await getAccessTokenSilently({
         authorizationParams: {
           audience: import.meta.env.VITE_AUTH0_AUDIENCE,
@@ -64,6 +76,8 @@ const ProfileForm = () => {
         console.log("updated user!");
         const data = await response.json();
         console.log(data);
+        document.getElementById("my_modal_2").showModal();
+        reset();
       }
     } catch (e) {
       console.log(e.message);
