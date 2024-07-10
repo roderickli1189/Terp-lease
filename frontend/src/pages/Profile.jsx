@@ -3,6 +3,8 @@ import Loading from "./Loading";
 import Header from "../Header";
 import ProfileForm from "../forms/ProfileForm";
 import React, { useEffect, useState } from "react";
+import { CodeSnippet } from "../CodeSnippet";
+import { jwtDecode } from "jwt-decode";
 
 const Profile = () => {
   const { user, isAuthenticated, isLoading, getAccessTokenSilently } =
@@ -12,9 +14,31 @@ const Profile = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchPhone();
+      fetchPhoneIDToken();
     }
   }, [user, isLoading]);
+
+  const fetchPhoneIDToken = async () => {
+    try {
+      const idToken = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        },
+      });
+      const decodedToken = jwtDecode(idToken);
+      console.log(decodedToken);
+
+      // Extract phoneNumber from the custom namespace in the decoded token
+      const namespace = "https://getphoneuser_metadata";
+      if (decodedToken[namespace] && decodedToken[namespace].phoneNumber) {
+        setPhone(decodedToken[namespace].phoneNumber);
+      } else {
+        setPhone("None");
+      }
+    } catch (error) {
+      console.error("Error decoding ID token:", error);
+    }
+  };
 
   const fetchPhone = async () => {
     try {
@@ -82,6 +106,12 @@ const Profile = () => {
               <p>Nickname: {user.nickname}</p>
               <p>Phone number: {phone ? phone : "None"}</p>
             </div>
+          </div>
+          <div className="profile__details">
+            <CodeSnippet
+              title="Decoded ID Token"
+              code={JSON.stringify(user, null, 2)}
+            />
           </div>
           <ProfileForm />
         </div>
