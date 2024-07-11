@@ -2,7 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import Loading from "./Loading";
 import Header from "../Header";
 import ProfileForm from "../forms/ProfileForm";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { CodeSnippet } from "../CodeSnippet";
 import { jwtDecode } from "jwt-decode";
 
@@ -14,6 +14,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      fetchPhone();
       fetchPhoneIDToken();
     }
   }, [user, isLoading]);
@@ -29,7 +30,7 @@ const Profile = () => {
       console.log(decodedToken);
 
       // Extract phoneNumber from the custom namespace in the decoded token
-      const namespace = "https://getphoneuser_metadata";
+      const namespace = "getphoneuser";
       if (decodedToken[namespace] && decodedToken[namespace].phoneNumber) {
         setPhone(decodedToken[namespace].phoneNumber);
       } else {
@@ -104,6 +105,7 @@ const Profile = () => {
               <h2>Name: {user.name}</h2>
               <p>Email: {user.email}</p>
               <p>Nickname: {user.nickname}</p>
+              <p>Phone: {user.getphoneuser.phoneNumber}</p>
               <p>Phone number: {phone ? phone : "None"}</p>
             </div>
           </div>
